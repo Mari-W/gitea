@@ -1,0 +1,38 @@
+version: "3"
+
+# Make the externally created network "gateway" available as network "default"
+networks:
+  default:
+    external:
+      name: gateway
+
+services:
+  gitea:
+    build: .
+    container_name: gitea
+    restart: always
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    networks:
+      - default
+    volumes:
+      - ./data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      # Expose this container.
+      - "traefik.enable=true"
+      # Expose it under the following host.
+      - "traefik.http.routers.gitea.rule=Host(`git.contravariant.net`)"
+      # Allow requests only to enter over our websecure entry point
+      - "traefik.http.routers.gitea.entrypoints=websecure"
+      # Get an SSL certificate from letsencrypt as specified in our myresolver config
+      - "traefik.http.routers.gitea.tls.certresolver=myresolver"
+      # Register a port (required when multiple ports are exposed)
+      - "traefik.http.services.gitea.loadbalancer.server.port=3000"
+      # Redirect to correct login on visit
+      - "traefik.http.routers.gitea.middlewares=student"
+      - "traefik.http.middlewares.student.redirectregex.regex=\/user\/login\\?.*$$"
+      - "traefik.http.middlewares.student.redirectregex.replacement=/user/oauth2/rz"
+
