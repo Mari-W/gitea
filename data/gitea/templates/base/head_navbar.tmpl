@@ -163,10 +163,10 @@
 						{{svg "octicon-person"}}
 						{{.i18n.Tr "your_profile"}}<!-- Your profile -->
 					</a>
-					<a class="item" href="{{AppSubUrl}}/{{.SignedUser.Name}}?tab=stars">
+					{{/*<a class="item" href="{{AppSubUrl}}/{{.SignedUser.Name}}?tab=stars">
 						{{svg "octicon-star"}}
 						{{.i18n.Tr "your_starred"}}
-					</a>
+					</a>*/}}
 					<a class="{{if .PageIsUserSettings}}active{{end}} item" href="{{AppSubUrl}}/user/settings">
 						{{svg "octicon-tools"}}
 						{{.i18n.Tr "your_settings"}}<!-- Your settings -->
