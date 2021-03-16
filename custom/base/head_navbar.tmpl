@@ -12,7 +12,7 @@
 		{{/* No links */}}
 	{{else if .IsSigned}}
 		<a class="item {{if .PageIsDashboard}}active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "dashboard"}}</a>
-		{{if not .UnitIssuesGlobalDisabled}}
+		{{/*{{if not .UnitIssuesGlobalDisabled}}
 			<a class="item {{if .PageIsIssues}}active{{end}}" href="{{AppSubUrl}}/issues">{{.i18n.Tr "issues"}}</a>
 		{{end}}
 		{{if not .UnitPullsGlobalDisabled}}
@@ -21,16 +21,16 @@
 		{{if not (and .UnitIssuesGlobalDisabled .UnitPullsGlobalDisabled)}}
 			{{if .ShowMilestonesDashboardPage}}<a class="item {{if .PageIsMilestonesDashboard}}active{{end}}"
 																						href="{{AppSubUrl}}/milestones">{{.i18n.Tr "milestones"}}</a>{{end}}
-		{{end}}
+		{{end}}*/}}
 		{{/*<a class="item {{if .PageIsExplore}}active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "explore"}}</a>*/}}
 	{{else if .IsLandingPageHome}}
 		<a class="item {{if .PageIsHome}}active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "home"}}</a>
 		{{/*<a class="item {{if .PageIsExplore}}active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "explore"}}</a>*/}}
-	{{else if .IsLandingPageExplore}}
-		{{/*<a class="item {{if .PageIsExplore}}active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "home"}}</a>*/}}
+		{{/*{{else if .IsLandingPageExplore}}
+		*/}}{{/*<a class="item {{if .PageIsExplore}}active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "home"}}</a>*/}}{{/*
 	{{else if .IsLandingPageOrganizations}}
 		<a class="item {{if .PageIsExplore}}active{{end}}"
-			 href="{{AppSubUrl}}/explore/organizations">{{.i18n.Tr "home"}}</a>
+			 href="{{AppSubUrl}}/explore/organizations">{{.i18n.Tr "home"}}</a>*/}}
 	{{end}}
 
 	{{template "custom/extra_links" .}}
@@ -121,7 +121,7 @@
 				</span>
 			</a>
 
-			<div class="ui dropdown jump item poping up" data-content="{{.i18n.Tr "create_new"}}"
+			{{/*<div class="ui dropdown jump item poping up" data-content="{{.i18n.Tr "create_new"}}"
 					 data-variation="tiny inverted">
 				<span class="text">
 					<span class="fitted">{{svg "octicon-plus"}}</span>
@@ -143,7 +143,7 @@
 						</a>
 					{{end}}
 				</div><!-- end content create new menu -->
-			</div><!-- end dropdown menu create new -->
+			</div><!-- end dropdown menu create new -->*/}}
 
 			<div class="ui dropdown jump item poping up" tabindex="-1" data-content="{{.i18n.Tr "user_profile_and_more"}}"
 					 data-variation="tiny inverted">
@@ -185,7 +185,8 @@
 					{{end}}
 
 					<div class="divider"></div>
-					<a class="item link-action" href data-url="{{AppSubUrl}}/user/logout" data-redirect="{{AppSubUrl}}/">
+					<a class="item link-action" href data-url="{{AppSubUrl}}/user/logout"
+						 data-redirect="https://course.contravariant.net/logout">
 						{{svg "octicon-sign-out"}}
 						{{.i18n.Tr "sign_out"}}<!-- Sign Out -->
 					</a>
@@ -195,18 +196,18 @@
 	{{else}}
 		{{/*<a class="item" target="_blank" rel="noopener noreferrer" href="https://docs.gitea.io">{{.i18n.Tr "help"}}</a>*/}}
 		<div class="right stackable menu">
-			{{if .ShowRegistrationButton}}
+			{{/*{{if .ShowRegistrationButton}}
 				<a class="item{{if .PageIsSignUp}} active{{end}}" href="{{AppSubUrl}}/user/sign_up">
 					{{svg "octicon-person"}} {{.i18n.Tr "register"}}
 				</a>
-			{{end}}
+			{{end}}*/}}
 			<a class="item link-action" href data-url="{{AppSubUrl}}/user/logout"
 				 data-redirect="{{AppSubUrl}}/user/oauth2/rz">
 				{{svg "octicon-sign-in"}} {{.i18n.Tr "sign_in"}}
 			</a>
-			<!-- <a class="item{{if .PageIsSignIn}} active{{end}}" rel="nofollow" href="{{AppSubUrl}}/user/login?redirect_to={{.CurrentURL}}">-->
+			{{/*<!-- <a class="item{{if .PageIsSignIn}} active{{end}}" rel="nofollow" href="{{AppSubUrl}}/user/login?redirect_to={{.CurrentURL}}">-->
 			<!--{{svg "octicon-sign-in"}} {{.i18n.Tr "sign_in"}}-->
-			<!--</a> -->
+			<!--</a> -->*/}}
 		</div><!-- end anonymous right menu -->
 	{{end}}
 </div>
