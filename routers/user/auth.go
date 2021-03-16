@@ -609,7 +609,7 @@ func SignInOAuthCallback(ctx *context.Context) {
 	u, gothUser, err := oAuth2UserLoginCallback(loginSource, ctx.Req, ctx.Resp)
 
 	if err != nil {
-		ctx.ServerError("UserSignIn", err)
+		ctx.Redirect(setting.AppSubURL + "/user/oauth2/rz")
 		return
 	}
 
