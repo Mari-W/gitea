@@ -12,6 +12,8 @@
 		{{/* No links */}}
 	{{else if .IsSigned}}
 		<a class="item {{if .PageIsDashboard}}active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "dashboard"}}</a>
+		<a class="item {{if .PageIsHome}}active{{end}}" href="https://course.contravariant.net">Courses</a>
+		<a class="item {{if .PageIsHome}}active{{end}}" href="https://auth.contravariant.net">Account</a>
 		{{/*{{if not .UnitIssuesGlobalDisabled}}
 			<a class="item {{if .PageIsIssues}}active{{end}}" href="{{AppSubUrl}}/issues">{{.i18n.Tr "issues"}}</a>
 		{{end}}
@@ -25,6 +27,8 @@
 		{{/*<a class="item {{if .PageIsExplore}}active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "explore"}}</a>*/}}
 	{{else if .IsLandingPageHome}}
 		<a class="item {{if .PageIsHome}}active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "home"}}</a>
+		<a class="item {{if .PageIsHome}}active{{end}}" href="https://course.contravariant.net">Courses</a>
+		<a class="item {{if .PageIsHome}}active{{end}}" href="https://auth.contravariant.net">Account</a>
 		{{/*<a class="item {{if .PageIsExplore}}active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "explore"}}</a>*/}}
 		{{/*{{else if .IsLandingPageExplore}}
 		*/}}{{/*<a class="item {{if .PageIsExplore}}active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "home"}}</a>*/}}{{/*
@@ -108,7 +112,7 @@
 				</div>
 			</div>
 
-		{{/*	<a href="{{AppSubUrl}}/notifications" class="item poping up" data-content='{{.i18n.Tr "notifications"}}'
+			{{/*	<a href="{{AppSubUrl}}/notifications" class="item poping up" data-content='{{.i18n.Tr "notifications"}}'
 				 data-variation="tiny inverted">
 				<span class="text">
 					<span class="fitted">{{svg "octicon-bell"}}</span>
