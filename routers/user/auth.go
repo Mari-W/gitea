@@ -609,6 +609,10 @@ func SignInOAuthCallback(ctx *context.Context) {
 	u, gothUser, err := oAuth2UserLoginCallback(loginSource, ctx.Req, ctx.Resp)
 
 	if err != nil {
+		// redirecting to login again as this error occurs when try logging in after
+		// not completing another login attempt before.
+		// this happens when a user tries registering the first time using gitea as a the register service which redirects
+		// to the course server :)
 		ctx.Redirect(setting.AppSubURL + "/user/oauth2/rz")
 		return
 	}
