@@ -50,7 +50,6 @@ coverage.all
 
 /bin
 /dist
-/data
 /indexers
 /log
 /public/img/avatar
