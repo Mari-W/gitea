@@ -96,8 +96,8 @@
 						</div>
 					</div>
 				</div>
-				{{/*<div class="ui secondary tiny pointing borderless menu center aligned grid repos-filter">
-					<a class="item" :class="{active: reposFilter === 'all'}" @click="changeReposFilter('all')">
+				<div class="ui secondary tiny pointing borderless menu center aligned grid repos-filter">
+					{{/*<a class="item" :class="{active: reposFilter === 'all'}" @click="changeReposFilter('all')">
 						{{.i18n.Tr "all"}}
 						<div v-show="reposFilter === 'all'" class="ui circular mini grey label">${repoTypeCount}</div>
 					</a>
@@ -116,9 +116,9 @@
 					<a class="item" :class="{active: reposFilter === 'collaborative'}" @click="changeReposFilter('collaborative')">
 						{{.i18n.Tr "collaborative"}}
 						<div v-show="reposFilter === 'collaborative'" class="ui circular mini grey label">${repoTypeCount}</div>
-					</a>
+					</a>*/}}
 				</div>
-			</div>*/}}
+			</div>
 			<div v-if="repos.length" class="ui attached table segment rounded-bottom">
 				<ul class="repo-owner-name-list">
 					<li v-for="repo in repos" :class="{'private': repo.private || repo.internal}">
