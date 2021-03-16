@@ -40,7 +40,7 @@
 				<div class="ui fluid right action left icon input" :class="{loading: isLoading}">
 					<input @input="searchRepos(reposFilter)" v-model="searchQuery" ref="search" placeholder="{{.i18n.Tr "home.search_repos"}}">
 					<i class="icon df ac jc">{{svg "octicon-search" 16}}</i>
-					<div class="ui dropdown icon button" title="{{.i18n.Tr "home.filter"}}">
+					{{/*<div class="ui dropdown icon button" title="{{.i18n.Tr "home.filter"}}">
 						<i class="icon df ac jc m-0">{{svg "octicon-filter" 16}}</i>
 						<div class="menu">
 							<div class="item">
@@ -94,7 +94,7 @@
 								</a>
 							</div>
 						</div>
-					</div>
+					</div>*/}}
 				</div>
 				<div class="ui secondary tiny pointing borderless menu center aligned grid repos-filter">
 					{{/*<a class="item" :class="{active: reposFilter === 'all'}" @click="changeReposFilter('all')">
