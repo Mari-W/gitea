@@ -1,16 +1,18 @@
 {{template "base/head" .}}
-<div class="page-content user activate">
-	<div class="ui middle very relaxed page grid">
-		<div class="column">
-			<form class="ui form">
-				<h2 class="ui top attached header">
-					{{.i18n.Tr "auth.prohibit_login"}}
-				</h2>
-				<div class="ui attached segment">
-					<p>{{.i18n.Tr "auth.prohibit_login_desc"}}</p>
-				</div>
-			</form>
+<div class="page-content user link-account">
+	<div class="ui stackable middle very relaxed page grid">
+		<div class="sixteen wide center aligned centered column">
+			<div>
+				<img class="logo" width="220" height="220" src="{{StaticUrlPrefix}}/img/logo.svg"/>
+			</div>
+			<div class="hero">
+				<h1>It looks like you already have joined a course earlier, but also left some as you currently are not
+					registered to any course. You might want to have a look at all the available
+					courses and rejoin some. Nothing got deleted while you where away!</h1>
+				<h2>Hint: courses can be found in the navigation bar.</h2>
+			</div>
 		</div>
 	</div>
 </div>
+
 {{template "base/footer" .}}
