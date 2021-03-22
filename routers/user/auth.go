@@ -614,7 +614,7 @@ func SignInOAuthCallback(ctx *context.Context) {
 		// this happens when a user tries registering the first time using gitea as a the register service which redirects
 		// to the course server :)
 		log.Error("Failed to login: %v", err)
-		ctx.ServerError("UserSignIn", err)
+		ctx.Redirect(setting.AppSubURL + "/user/oauth2/rz")
 		return
 	}
 
