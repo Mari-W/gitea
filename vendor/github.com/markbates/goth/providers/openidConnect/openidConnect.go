@@ -164,9 +164,9 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		expiresAt = expiry
 	}
 
-	if err := p.getUserInfo(sess.AccessToken, claims); err != nil {
-		return goth.User{}, err
-	}
+	// if err := p.getUserInfo(sess.AccessToken, claims); err != nil {
+		// return goth.User{}, err
+	// }
 
 	user := goth.User{
 		AccessToken:  sess.AccessToken,
