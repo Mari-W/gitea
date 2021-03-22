@@ -164,8 +164,10 @@ func (p *Provider) FetchUser(session goth.Session) (goth.User, error) {
 		expiresAt = expiry
 	}
 
+
+	// prevent Gitea from using UserInfo endpoint on the OpenID Provider as it is probably implemented the wrong way
 	// if err := p.getUserInfo(sess.AccessToken, claims); err != nil {
-		// return goth.User{}, err
+	//   return goth.User{}, err
 	// }
 
 	user := goth.User{
