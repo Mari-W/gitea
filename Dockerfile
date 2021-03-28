@@ -14,6 +14,10 @@ ARG CGO_EXTRA_CFLAGS
 #Build deps
 RUN apk --no-cache add build-base git nodejs npm
 
+RUN apt-get update -y && \
+    apt-get install -y python3 
+
+
 #Setup repo
 COPY . ${GOPATH}/src/code.gitea.io/gitea
 WORKDIR ${GOPATH}/src/code.gitea.io/gitea
