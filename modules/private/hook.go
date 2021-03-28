@@ -98,8 +98,7 @@ func HookPreReceive(ownerName, repoName string, opts HookOptions) (int, string) 
 
 func HookPreReceiveExternal(ownerName, repoName string, opts HookOptions) (int, string) {
 	if setting.Git.EnablePreReceive {
-		reqURL := fmt.Sprintf("%s/%s/%s",
-			setting.Git.PreReceiveHookUrl,
+		reqURL := setting.Git.PreReceiveHookUrl + fmt.Sprintf("%s/%s",
 			url.PathEscape(ownerName),
 			url.PathEscape(repoName),
 		)
