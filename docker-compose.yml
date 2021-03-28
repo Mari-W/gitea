@@ -20,6 +20,7 @@ services:
       - ./data:/data
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+      - /home/git/.ssh:/data/git/.ssh
     labels:
       # Expose this container.
       - "traefik.enable=true"
@@ -31,8 +32,4 @@ services:
       - "traefik.http.routers.gitea.tls.certresolver=myresolver"
       # Register a port (required when multiple ports are exposed)
       - "traefik.http.services.gitea.loadbalancer.server.port=3000"
-      # Redirect to correct login on visit
-      - "traefik.http.routers.gitea.middlewares=student"
-      - "traefik.http.middlewares.student.redirectregex.regex=\/user\/login\\?.*$$"
-      - "traefik.http.middlewares.student.redirectregex.replacement=/user/oauth2/rz"
-
+      
