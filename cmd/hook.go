@@ -278,7 +278,6 @@ Gitea or set your environment appropriately.`, "")
 		case http.StatusForbidden:
 			fail(msgExt, "")
 		}
-
 	} else if lastline > 0 {
 		fmt.Fprintf(out, "\n")
 		lastline = 0
