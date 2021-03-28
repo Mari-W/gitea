@@ -12,7 +12,7 @@
 		{{/* No links */}}
 	{{else if .IsSigned}}
 		<a class="item {{if .PageIsDashboard}}active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "dashboard"}}</a>
-		<a class="item {{if .PageIsHome}}active{{end}}" href="{{AppSubUrl}}/courses">Courses</a>
+		<a class="item {{if .PageIsHome}}active{{end}}" href="{{AppSubUrl}}/user/settings/organization">Courses</a>
 		{{/*{{if not .UnitIssuesGlobalDisabled}}
 			<a class="item {{if .PageIsIssues}}active{{end}}" href="{{AppSubUrl}}/issues">{{.i18n.Tr "issues"}}</a>
 		{{end}}
