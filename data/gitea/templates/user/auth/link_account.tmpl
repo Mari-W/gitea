@@ -3,7 +3,7 @@
 	.iframe-container {
 		overflow: hidden;
 		/* 16:9 aspect ratio */
-		padding-top: 75%;
+		padding-top: 56.25%;
 		position: relative;
 	}
 
@@ -13,12 +13,12 @@
 		left: 0;
 		position: absolute;
 		top: 0;
-		width: 100%;
+		width: 85%;
 	}
 </style>
 <div class="page-content user link-account">
-	<div class="two row">
-		{{/*<div class="sixteen wide center aligned centered column">
+	<div class="ui stackable middle very relaxed page grid">
+		<div class="sixteen wide center aligned centered column">
 			<div>
 				<img class="logo" width="220" height="220" src="{{StaticUrlPrefix}}/img/logo.svg"/>
 			</div>
@@ -28,16 +28,16 @@
 				<h2>Hint: courses can be found in the navigation bar.</h2>
 			</div>
 		</div>
-	</div>*/}}
-		<div class="iframe-container">
+	</div>
+	{{/*<div class="iframe-container">
 			<iframe scrolling="no" src="https://course.contravariant.net/embed"></iframe>
 		</div>
 		<div class="actions">
-			<a href="/user/oauth2/rz" class="ui green basic ok button">
+			<div class="ui green basic ok button">
 				<i class="save icon"></i>
 				Continue
-			</a>
-		</div>
+			</div>
+		</div>*/}}
 		{{/*<div class="ui secondary pointing tabular top attached borderless menu new-menu navbar">
 		<div class="new-menu-inner">
 			<!-- TODO handle .ShowRegistrationButton once other login bugs are fixed -->
