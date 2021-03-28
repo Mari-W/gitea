@@ -270,6 +270,15 @@ Gitea or set your environment appropriately.`, "")
 		case http.StatusForbidden:
 			fail(msg, "")
 		}
+
+		statusCodeExt, msgExt := private.HookPreReceiveExternal(username, reponame, hookOptions)
+		switch statusCodeExt {
+		case http.StatusInternalServerError:
+			fail("Internal Server Error", msgExt)
+		case http.StatusForbidden:
+			fail(msgExt, "")
+		}
+
 	} else if lastline > 0 {
 		fmt.Fprintf(out, "\n")
 		lastline = 0
