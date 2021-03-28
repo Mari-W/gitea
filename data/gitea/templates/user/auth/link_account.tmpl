@@ -1,31 +1,9 @@
 {{template "base/head" .}}
-<style>
-	.iframe-container {
-		overflow: hidden;
-		/* 16:9 aspect ratio */
-		padding-top: 56.25%;
-		position: relative;
-	}
-
-	.iframe-container iframe {
-		border: 0;
-		height: 50%;
-		left: 0;
-		position: absolute;
-		top: 0;
-		width: 85%;
-	}
-</style>
 <div class="page-content user link-account">
 	<div class="ui stackable middle very relaxed page grid">
 		<div class="sixteen wide center aligned centered column">
-			<div>
-				<img class="logo" width="220" height="220" src="{{StaticUrlPrefix}}/img/logo.svg"/>
-			</div>
-			<div class="hero">
-				<h1>It looks like you haven't joined any course yet! You might want to have a look at all the available
-					courses.</h1>
-				<h2>Hint: courses can be found in the navigation bar.</h2>
+			<div class="iframe-container">
+				<iframe style="border: 0; overflow: hidden" scrolling="no" src="https://course.contravariant.net/embed"></iframe>
 			</div>
 		</div>
 	</div>
