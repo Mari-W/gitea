@@ -26,7 +26,7 @@
 		{{/*<a class="item {{if .PageIsExplore}}active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "explore"}}</a>*/}}
 	{{else if .IsLandingPageHome}}
 		<a class="item {{if .PageIsHome}}active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "home"}}</a>
-		<a class="item {{if .PageIsHome}}active{{end}}" href="https://course.contravariant.net">Courses</a>
+		<a class="item {{if .PageIsHome}}active{{end}}" href="{{AppSubUrl}}/user/oauth2/rz">Courses</a>
 		{{/*<a class="item {{if .PageIsExplore}}active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "explore"}}</a>*/}}
 		{{/*{{else if .IsLandingPageExplore}}
 		*/}}{{/*<a class="item {{if .PageIsExplore}}active{{end}}" href="{{AppSubUrl}}/explore/repos">{{.i18n.Tr "home"}}</a>*/}}{{/*
