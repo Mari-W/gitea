@@ -97,27 +97,31 @@ func HookPreReceive(ownerName, repoName string, opts HookOptions) (int, string) 
 }
 
 func HookPreReceiveExternal(ownerName, repoName string, opts HookOptions) (int, string) {
-	reqURL := setting.LocalURL + fmt.Sprintf("%s/%s/%s",
-		setting.Git.PreReceiveHookUrl,
-		url.PathEscape(ownerName),
-		url.PathEscape(repoName),
-	)
-	req := newInternalRequest(reqURL, "POST")
-	req = req.Header("Content-Type", "application/json")
-	jsonBytes, _ := json.Marshal(opts)
-	req.Body(jsonBytes)
-	req.SetTimeout(60*time.Second, time.Duration(60+len(opts.OldCommitIDs))*time.Second)
-	resp, err := req.Response()
-	if err != nil {
-		return http.StatusInternalServerError, fmt.Sprintf("Unable to contact external pre-commit-hook: %v", err.Error())
-	}
-	defer resp.Body.Close()
+	if setting.Git.EnablePreReceive {
+		reqURL := fmt.Sprintf("%s/%s/%s",
+			setting.Git.PreReceiveHookUrl,
+			url.PathEscape(ownerName),
+			url.PathEscape(repoName),
+		)
+		req := newInternalRequest(reqURL, "POST")
+		req = req.Header("Content-Type", "application/json")
+		jsonBytes, _ := json.Marshal(opts)
+		req.Body(jsonBytes)
+		req.SetTimeout(60*time.Second, time.Duration(60+len(opts.OldCommitIDs))*time.Second)
+		resp, err := req.Response()
+		if err != nil {
+			return http.StatusInternalServerError, fmt.Sprintf("Unable to contact external pre-commit-hook: %v", err.Error())
+		}
+		defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return resp.StatusCode, decodeJSONError(resp).Err
-	}
+		if resp.StatusCode != http.StatusOK {
+			return resp.StatusCode, decodeJSONError(resp).Err
+		}
 
-	return http.StatusOK, ""
+		return http.StatusOK, ""
+	} else {
+		return http.StatusOK, ""
+	}
 }
 
 // HookPostReceive updates services and users

@@ -14,7 +14,8 @@ import (
 var (
 	// Git settings
 	Git = struct {
-		PreReceiveHookUrl					string
+		EnablePreReceive          bool
+		PreReceiveHookUrl         string
 		Path                      string
 		DisableDiffHighlight      bool
 		MaxGitDiffLines           int
