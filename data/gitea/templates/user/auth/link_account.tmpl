@@ -1,7 +1,7 @@
 {{template "base/head" .}}
 <div class="page-content user link-account">
-	{{/*<div class="ui stackable middle very relaxed page grid">
-		<div class="sixteen wide center aligned centered column">
+	<div class="ui stackable middle very relaxed page grid">
+		{{/*<div class="sixteen wide center aligned centered column">
 			<div>
 				<img class="logo" width="220" height="220" src="{{StaticUrlPrefix}}/img/logo.svg"/>
 			</div>
@@ -12,31 +12,31 @@
 			</div>
 		</div>
 	</div>*/}}
-	<style>
-		.iframe-container {
-			overflow: hidden;
-			/* 16:9 aspect ratio */
-			padding-top: 56.25%;
-			position: relative;
-		}
+		<style>
+			.iframe-container {
+				overflow: hidden;
+				/* 16:9 aspect ratio */
+				padding-top: 56.25%;
+				position: relative;
+			}
 
-		.iframe-container iframe {
-			border: 0;
-			height: 40%;
-			left: 0;
-			position: absolute;
-			top: 0;
-			width: 90%;
-		}
-	</style>
-	<div class="iframe-container">
-		<iframe scrolling="no" src="https://course.contravariant.net/embed"></iframe>
-	</div>
-	<div class="ui green basic inverted button">
-		<i class="remove icon"></i>
-		Continue
-	</div>
-	{{/*<div class="ui secondary pointing tabular top attached borderless menu new-menu navbar">
+			.iframe-container iframe {
+				border: 0;
+				height: 50%;
+				left: 0;
+				position: absolute;
+				top: 0;
+				width: 85%;
+			}
+		</style>
+		<div class="iframe-container">
+			<iframe scrolling="no" src="https://course.contravariant.net/embed"></iframe>
+		</div>
+		<div class="ui green basic inverted button">
+			<i class="remove icon"></i>
+			Continue
+		</div>
+		{{/*<div class="ui secondary pointing tabular top attached borderless menu new-menu navbar">
 		<div class="new-menu-inner">
 			<!-- TODO handle .ShowRegistrationButton once other login bugs are fixed -->
 			<a class="item {{if not .user_exists}}active{{end}}"
@@ -64,6 +64,7 @@
 			</div>
 		</div>
 	</div>*/}}
+	</div>
 </div>
 
 {{template "base/footer" .}}
