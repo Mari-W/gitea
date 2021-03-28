@@ -58,8 +58,6 @@ ENV GITEA_CUSTOM /data/gitea
 
 VOLUME ["/data"]
 
-RUN "git config --global core.hooksPath /data/git/hooks"
-
 ENTRYPOINT ["/usr/bin/entrypoint"]
 CMD ["/bin/s6-svscan", "/etc/s6"]
 
