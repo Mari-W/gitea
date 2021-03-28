@@ -101,3 +101,6 @@ prime/
 
 # Make evidence files
 /.make_evidence
+
+# Manpage
+/man
