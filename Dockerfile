@@ -56,6 +56,8 @@ RUN addgroup \
 ENV USER git
 ENV GITEA_CUSTOM /data/gitea
 
+RUN "git config --global init.templatedir '~/.git_template'"
+
 VOLUME ["/data"]
 
 ENTRYPOINT ["/usr/bin/entrypoint"]
