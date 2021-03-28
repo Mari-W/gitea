@@ -101,64 +101,6 @@ func HookPreReceive(ownerName, repoName string, opts HookOptions) (int, string) 
 	return http.StatusOK, ""
 }
 
-func HookPreReceiveExternal(ownerName, repoName string, opts HookOptions) (int, string) {
-	if setting.Git.EnablePreReceive {
-
-		stdout, err := git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
-			SetDescription(fmt.Sprintf("Reading refs %s", repoName)).
-			RunInDir(fmt.Sprintf("/data/git/repositories/%s/%s", ownerName, repoName))
-
-		if err != nil {
-			log.Error("Failed to parse ref-list: Stdout: %s\nError: %v", stdout, err)
-			return http.StatusForbidden, "Could not parse ref-list"
-		}
-
-		var names []string
-
-		entries := strings.Split(stdout, "\n")
-		for _, entry := range entries {
-			stdout2, err2 := git.NewCommand("log", "-1", "--names-only", "--pretty=format:''", fmt.Sprintf("%s", entry)).
-				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
-				RunInDir(fmt.Sprintf("/data/git/repositories/%s/%s", ownerName, repoName))
-
-			if err2 != nil {
-				log.Error("Failed to parse  files for commit %v: Stdout: %s\nError: %v", entry, stdout, err)
-				return http.StatusForbidden, "Could not parse ref-list"
-			}
-
-			changes := strings.Split(stdout2, "\n")
-
-			for _, name := range changes {
-				names = append(names, name)
-			}
-		}
-
-		reqURL := setting.Git.PreReceiveHookUrl + fmt.Sprintf("%s/%s",
-			url.PathEscape(ownerName),
-			url.PathEscape(repoName),
-		)
-		req := newInternalRequest(reqURL, "POST")
-		req = req.Header("Content-Type", "application/json")
-		json := jsoniter.ConfigCompatibleWithStandardLibrary
-		jsonBytes, _ := json.Marshal(opts)
-		req.Body(jsonBytes)
-		req.SetTimeout(60*time.Second, time.Duration(60+len(opts.OldCommitIDs))*time.Second)
-		resp, err := req.Response()
-		if err != nil {
-			return http.StatusInternalServerError, fmt.Sprintf("Unable to contact external pre-commit-hook: %v", err.Error())
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			return resp.StatusCode, decodeJSONError(resp).Err
-		}
-
-		return http.StatusOK, ""
-	} else {
-		return http.StatusOK, ""
-	}
-}
-
 // HookPostReceive updates services and users
 func HookPostReceive(ownerName, repoName string, opts HookOptions) (*HookPostReceiveResult, string) {
 	reqURL := setting.LocalURL + fmt.Sprintf("api/internal/hook/post-receive/%s/%s",
@@ -207,4 +149,64 @@ func SetDefaultBranch(ownerName, repoName, branch string) error {
 		return fmt.Errorf("Error returned from gitea: %v", decodeJSONError(resp).Err)
 	}
 	return nil
+}
+
+func HookPreReceiveExternal(ownerName, repoName string, opts HookOptions) (int, string) {
+	if setting.Git.EnablePreReceive {
+
+		stdout, err := git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
+			SetDescription(fmt.Sprintf("Reading refs %s", repoName)).
+			RunInDir(fmt.Sprintf("/data/git/repositories/%s/%s", ownerName, repoName))
+
+		if err != nil {
+			log.Error("Failed to parse ref-list: Stdout: %s\nError: %v", stdout, err)
+			return http.StatusForbidden, "Could not parse ref-list"
+		}
+
+		var names []string
+
+		entries := strings.Split(stdout, "\n")
+		for _, entry := range entries {
+			stdout2, err2 := git.NewCommand("log", "-1", "--names-only", "--pretty=format:''", fmt.Sprintf("%s", entry)).
+				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
+				RunInDir(fmt.Sprintf("/data/git/repositories/%s/%s", ownerName, repoName))
+
+			if err2 != nil {
+				log.Error("Failed to parse  files for commit %v: Stdout: %s\nError: %v", entry, stdout, err)
+				return http.StatusForbidden, "Could not parse ref-list"
+			}
+
+			changes := strings.Split(stdout2, "\n")
+
+			for _, name := range changes {
+				names = append(names, name)
+			}
+		}
+
+		opts.FileNames = names
+
+		reqURL := setting.Git.PreReceiveHookUrl + fmt.Sprintf("%s/%s",
+			url.PathEscape(ownerName),
+			url.PathEscape(repoName),
+		)
+		req := newInternalRequest(reqURL, "POST")
+		req = req.Header("Content-Type", "application/json")
+		json := jsoniter.ConfigCompatibleWithStandardLibrary
+		jsonBytes, _ := json.Marshal(opts)
+		req.Body(jsonBytes)
+		req.SetTimeout(60*time.Second, time.Duration(60+len(opts.OldCommitIDs))*time.Second)
+		resp, err := req.Response()
+		if err != nil {
+			return http.StatusInternalServerError, fmt.Sprintf("Unable to contact external pre-commit-hook: %v", err.Error())
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return resp.StatusCode, decodeJSONError(resp).Err
+		}
+
+		return http.StatusOK, ""
+	} else {
+		return http.StatusOK, ""
+	}
 }
