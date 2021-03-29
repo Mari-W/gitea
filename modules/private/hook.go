@@ -6,7 +6,6 @@ package private
 
 import (
 	"code.gitea.io/gitea/modules/git"
-	"code.gitea.io/gitea/modules/log"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -151,16 +150,16 @@ func SetDefaultBranch(ownerName, repoName, branch string) error {
 	return nil
 }
 
-func HookPreReceiveExternal(ownerName, repoName string, opts HookOptions) (int, string) {
+func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions) (int, string) {
 	if setting.Git.EnablePreReceive {
 
 		stdout, err := git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
-			SetDescription(fmt.Sprintf("Reading refs %s", repoName)).
+			SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
 			RunInDir(fmt.Sprintf("/data/git/repositories/%s/%s.git/", ownerName, repoName))
 
 		if err != nil {
-			log.Error("Failed to parse ref-list: Stdout: %s\nError: %v", stdout, err)
-			return http.StatusForbidden, "Could not parse ref-list"
+			fmt.Errorf("failed to parse ref-list: Stdout: %s\nError: %v", stdout, err)
+			return http.StatusForbidden, "Could not parse rev-list"
 		}
 
 		var names []string
@@ -172,7 +171,7 @@ func HookPreReceiveExternal(ownerName, repoName string, opts HookOptions) (int, 
 				RunInDir(fmt.Sprintf("/data/git/repositories/%s/%s.git/", ownerName, repoName))
 
 			if err2 != nil {
-				log.Error("Failed to parse  files for commit %v: Stdout: %s\nError: %v", entry, stdout, err)
+				fmt.Errorf("Failed to parse  files for commit %v: Stdout: %s\nError: %v", entry, stdout, err)
 				return http.StatusForbidden, "Could not parse ref-list"
 			}
 
