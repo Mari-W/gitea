@@ -155,32 +155,34 @@ func SetDefaultBranch(ownerName, repoName, branch string) error {
 func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions) (int, string) {
 	if setting.Git.EnablePreReceive {
 
-		stdout, err := git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
+		revList, err := git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
 			SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
 			RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 
 		if err != nil {
-			log.Error("failed to parse ref-list: Stdout: %s\nError: %v", stdout, err)
+			log.Error("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
 			return http.StatusForbidden, "Could not parse ref-list"
 		}
 
 		var names []string
 
-		entries := strings.Split(stdout, "\n")
+		entries := strings.Split(revList, "\n")
+
 		for _, entry := range entries {
-			stdout2, err2 := git.NewCommand("--no-pager", "log", "-1", "--name-status", "--pretty=format:''").
+			nameStatus, err := git.NewCommand("--no-pager", "log", "-1", "--name-status", "--pretty=format:''", strings.TrimSpace(entry)).
 				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
 				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 
-			if err2 != nil {
-				log.Error("Failed to parse  files for commit %v: Stdout: %s\nError: %v", entry, stdout, err)
+			if err != nil {
+				log.Info("Failed to read commit %s", entry)
+				log.Error("Failed to parse  files for commit %v: Stdout: %s\nError: %v", entry, nameStatus, err)
 				return http.StatusForbidden, "Could not parse file names"
 			}
 
-			changes := strings.Split(stdout2, "\n")
+			changes := strings.Split(nameStatus, "\n")
 
 			for _, name := range changes {
-				names = append(names, name)
+				names = append(names, strings.TrimSpace(name))
 			}
 		}
 
