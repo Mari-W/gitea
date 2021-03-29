@@ -21,6 +21,8 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
       - /home/git/.ssh:/data/git/.ssh
+    ports:
+      - "127.0.0.1:2222:22"
     labels:
       # Expose this container.
       - "traefik.enable=true"
