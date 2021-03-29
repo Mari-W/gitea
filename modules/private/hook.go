@@ -6,6 +6,7 @@ package private
 
 import (
 	"code.gitea.io/gitea/modules/git"
+	"code.gitea.io/gitea/modules/log"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -155,10 +156,10 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 		stdout, err := git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
 			SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
-			RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git/", setting.Git.GitRoot, ownerName, repoName))
+			RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 
 		if err != nil {
-			fmt.Errorf("failed to parse ref-list: Stdout: %s\nError: %v", stdout, err)
+			log.Error("failed to parse ref-list: Stdout: %s\nError: %v", stdout, err)
 			return http.StatusForbidden, "Could not parse ref-list"
 		}
 
@@ -166,12 +167,12 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 		entries := strings.Split(stdout, "\n")
 		for _, entry := range entries {
-			stdout2, err2 := git.NewCommand("log", "-1", "--name-only", "--pretty=format:''", entry).
+			stdout2, err2 := git.NewCommand("--no-pager", "log", "-1", "--name-status", "--pretty=format:''", entry).
 				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
-				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git/", setting.Git.GitRoot, ownerName, repoName))
+				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 
 			if err2 != nil {
-				fmt.Errorf("Failed to parse  files for commit %v: Stdout: %s\nError: %v", entry, stdout, err)
+				log.Error("Failed to parse  files for commit %v: Stdout: %s\nError: %v", entry, stdout, err)
 				return http.StatusForbidden, "Could not parse file names"
 			}
 
