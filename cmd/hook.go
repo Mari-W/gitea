@@ -170,12 +170,13 @@ Gitea or set your environment appropriately.`, "")
 	username := os.Getenv(models.EnvRepoUsername)
 	reponame := os.Getenv(models.EnvRepoName)
 	userID, _ := strconv.ParseInt(os.Getenv(models.EnvPusherID), 10, 64)
+	pusherName := os.Getenv(models.EnvPusherName)
 	prID, _ := strconv.ParseInt(os.Getenv(models.EnvPRID), 10, 64)
 	isDeployKey, _ := strconv.ParseBool(os.Getenv(models.EnvIsDeployKey))
 
 	hookOptions := private.HookOptions{
 		UserID:                          userID,
-		UserName:                        os.Getenv("USER"),
+		UserName:                        pusherName,
 		GitAlternativeObjectDirectories: os.Getenv(private.GitAlternativeObjectDirectories),
 		GitObjectDirectory:              os.Getenv(private.GitObjectDirectory),
 		GitQuarantinePath:               os.Getenv(private.GitQuarantinePath),
