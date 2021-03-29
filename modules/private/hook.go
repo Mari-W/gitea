@@ -8,6 +8,7 @@ import (
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/log"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -167,7 +168,7 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 		entries := strings.Split(stdout, "\n")
 		for _, entry := range entries {
-			stdout2, err2 := git.NewCommand("--no-pager", "log", "-1", "--name-status", "--pretty=format:''", entry).
+			stdout2, err2 := git.NewCommand("--no-pager", "log", "-1", "--name-status", "--pretty=format:''").
 				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
 				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 
@@ -202,7 +203,11 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			return resp.StatusCode, decodeJSONError(resp).Err
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return resp.StatusCode, "Unexpected failure"
+			}
+			return resp.StatusCode, string(body)
 		}
 	}
 	return http.StatusOK, ""
