@@ -180,7 +180,7 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 			if err != nil {
 				log.Error("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
-				return http.StatusForbidden, fmt.Sprintf("Failed to parse files for commit %s: \nStdout: %s\nError: %v", entry, nameStatus, err)
+				return http.StatusForbidden, fmt.Sprintf("Failed to parse files for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
 			}
 
 			changes := strings.Split(nameStatus, "\n")
