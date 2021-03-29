@@ -156,7 +156,7 @@ func HookPreReceiveExternal(ownerName, repoName string, opts HookOptions) (int, 
 
 		stdout, err := git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
 			SetDescription(fmt.Sprintf("Reading refs %s", repoName)).
-			RunInDir(fmt.Sprintf("/data/git/repositories/%s/%s/.git", ownerName, repoName))
+			RunInDir(fmt.Sprintf("/data/git/repositories/%s/%s.git/", ownerName, repoName))
 
 		if err != nil {
 			log.Error("Failed to parse ref-list: Stdout: %s\nError: %v", stdout, err)
@@ -169,7 +169,7 @@ func HookPreReceiveExternal(ownerName, repoName string, opts HookOptions) (int, 
 		for _, entry := range entries {
 			stdout2, err2 := git.NewCommand("log", "-1", "--names-only", "--pretty=format:''", fmt.Sprintf("%s", entry)).
 				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
-				RunInDir(fmt.Sprintf("/data/git/repositories/%s/%s/.git", ownerName, repoName))
+				RunInDir(fmt.Sprintf("/data/git/repositories/%s/%s.git/", ownerName, repoName))
 
 			if err2 != nil {
 				log.Error("Failed to parse  files for commit %v: Stdout: %s\nError: %v", entry, stdout, err)
@@ -204,9 +204,6 @@ func HookPreReceiveExternal(ownerName, repoName string, opts HookOptions) (int, 
 		if resp.StatusCode != http.StatusOK {
 			return resp.StatusCode, decodeJSONError(resp).Err
 		}
-
-		return http.StatusOK, ""
-	} else {
-		return http.StatusOK, ""
 	}
+	return http.StatusOK, ""
 }
