@@ -175,6 +175,7 @@ Gitea or set your environment appropriately.`, "")
 
 	hookOptions := private.HookOptions{
 		UserID:                          userID,
+		UserName:                        os.Getenv("USER"),
 		GitAlternativeObjectDirectories: os.Getenv(private.GitAlternativeObjectDirectories),
 		GitObjectDirectory:              os.Getenv(private.GitObjectDirectory),
 		GitQuarantinePath:               os.Getenv(private.GitQuarantinePath),
