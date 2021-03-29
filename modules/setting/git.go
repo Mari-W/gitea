@@ -16,6 +16,7 @@ var (
 	Git = struct {
 		EnablePreReceive          bool
 		PreReceiveHookUrl         string
+		GitRoot                   string
 		Path                      string
 		DisableDiffHighlight      bool
 		MaxGitDiffLines           int
