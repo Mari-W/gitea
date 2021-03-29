@@ -161,7 +161,7 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 		if err != nil {
 			log.Error("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
-			return http.StatusForbidden, "Could not parse ref-list"
+			return http.StatusForbidden, fmt.Sprintf("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
 		}
 
 		var names []string
@@ -174,9 +174,8 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 
 			if err != nil {
-				log.Info("Failed to read commit %s", entry)
-				log.Error("Failed to parse  files for commit %v: Stdout: %s\nError: %v", entry, nameStatus, err)
-				return http.StatusForbidden, "Could not parse file names"
+				log.Error("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
+				return http.StatusForbidden, fmt.Sprintf("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
 			}
 
 			changes := strings.Split(nameStatus, "\n")
