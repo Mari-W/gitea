@@ -166,9 +166,9 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 		entries := strings.Split(stdout, "\n")
 		for _, entry := range entries {
-			stdout2, err2 := git.NewCommand("log", "--name-only", "--pretty=format:''", entry).
+			stdout2, err2 := git.NewCommand("log", "-1", "--name-only", "--pretty=format:''", entry).
 				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
-				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git/", setting.Git.GitRoot, repoName))
+				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git/", setting.Git.GitRoot, ownerName, repoName))
 
 			if err2 != nil {
 				fmt.Errorf("Failed to parse  files for commit %v: Stdout: %s\nError: %v", entry, stdout, err)
