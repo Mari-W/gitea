@@ -169,13 +169,18 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 		entries := strings.Split(revList, "\n")
 
 		for _, entry := range entries {
-			nameStatus, err := git.NewCommand("--no-pager", "log", "-1", "--name-status", "--pretty=format:''", strings.TrimSpace(entry)).
+
+			if len(strings.TrimSpace(entry)) == 0 {
+				continue
+			}
+
+			nameStatus, err := git.NewCommand("--no-pager", "log", "-1", "--name-status", "--pretty=format:", strings.TrimSpace(entry)).
 				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
 				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 
 			if err != nil {
 				log.Error("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
-				return http.StatusForbidden, fmt.Sprintf("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
+				return http.StatusForbidden, fmt.Sprintf("Failed to parse files for commit %s: \nStdout: %s\nError: %v", entry, nameStatus, err)
 			}
 
 			changes := strings.Split(nameStatus, "\n")
