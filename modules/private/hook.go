@@ -155,9 +155,18 @@ func SetDefaultBranch(ownerName, repoName, branch string) error {
 func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions) (int, string) {
 	if setting.Git.EnablePreReceive {
 
-		revList, err := git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
-			SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
-			RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+		var revList string
+		var err error
+
+		if opts.OldCommitIDs[0] == "0000000000000000000000000000000000000000" {
+			revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s", opts.NewCommitIDs[0]), "--all").
+				SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
+				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+		} else {
+			revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
+				SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
+				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+		}
 
 		if err != nil {
 			log.Error("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
