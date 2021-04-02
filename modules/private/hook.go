@@ -213,7 +213,7 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 					if err != nil {
 						log.Error("Failed to parse diff for readme %s: Stdout: %s\nError: %v", entry, nameStatus, err)
-						return http.StatusInternalServerError, fmt.Sprintf("Failed to parse diff for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
+						return http.StatusForbidden, fmt.Sprintf("Failed to parse diff for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
 					}
 
 					reg, err := regexp.Compile("^[-+]?[0-9]+(\\.[0-9]+)?/[-+]?[0-9]+(\\.[0-9]+)?P$")
