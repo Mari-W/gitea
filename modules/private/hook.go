@@ -11,7 +11,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -292,12 +291,12 @@ func HookPostReceiveExternal(ownerName, repoName string, opts HookOptions) (int,
 						return http.StatusForbidden, fmt.Sprintf("Failed to parse diff for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
 					}
 
-					reg, err := regexp.Compile("^[-+]?[0-9]+(\\.[0-9]+)?/[-+]?[0-9]+(\\.[0-9]+)?P$")
+					/*reg, err := regexp.Compile("^[-+]?[0-9]+(\\.[0-9]+)?/[-+]?[0-9]+(\\.[0-9]+)?P$")
 					if err != nil {
 						panic(err)
-					}
+					}*/
 
-					readmeDiffs = append(readmeDiffs, ReadmeDiff{name, reg.FindAllString(diff, -1)})
+					readmeDiffs = append(readmeDiffs, ReadmeDiff{name, strings.Split(diff, "\n")})
 				}
 
 			}
