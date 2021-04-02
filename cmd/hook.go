@@ -388,6 +388,14 @@ Gitea or set your environment appropriately.`, "")
 				fail("Internal Server Error", err)
 			}
 
+			statusCodeExt, msgExt := private.HookPostReceiveExternal(repoUser, repoName, hookOptions)
+			switch statusCodeExt {
+			case http.StatusInternalServerError:
+				fail("Internal Server Error", msgExt)
+			case http.StatusForbidden:
+				fail(msgExt, "")
+			}
+
 			wasEmpty = wasEmpty || resp.RepoWasEmpty
 			results = append(results, resp.Results...)
 			count = 0

@@ -204,26 +204,6 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 			for _, name := range changes {
 				names = append(names, strings.TrimSpace(name))
-
-				if strings.Contains(strings.ToLower(name), "readme.md") {
-
-					diff, err := git.NewCommand("--no-pager", "diff", "-G\"^[-+]?[0-9]+(\\.[0-9]+)?\\/[-+]?[0-9]+(\\.[0-9]+)?P$\"", strings.TrimSpace(entry), "--", strings.TrimSpace(name)).
-						SetDescription(fmt.Sprintf("Parsing diffs in Readme %s", name)).
-						RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
-
-					if err != nil {
-						log.Error("Failed to parse diff for readme %s: Stdout: %s\nError: %v", entry, nameStatus, err)
-						return http.StatusForbidden, fmt.Sprintf("Failed to parse diff for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
-					}
-
-					reg, err := regexp.Compile("^[-+]?[0-9]+(\\.[0-9]+)?/[-+]?[0-9]+(\\.[0-9]+)?P$")
-					if err != nil {
-						panic(err)
-					}
-
-					readmeDiffs = append(readmeDiffs, ReadmeDiff{name, reg.FindAllString(diff, -1)})
-				}
-
 			}
 		}
 
@@ -257,7 +237,7 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 	return http.StatusOK, ""
 }
 
-/*func HookPostReceiveExternal(ownerName, repoName string, opts HookOptions) (*HookPostReceiveResult, string) {
+func HookPostReceiveExternal(ownerName, repoName string, opts HookOptions) (int, string) {
 	if setting.Git.EnablePreReceive {
 
 		var revList string
@@ -275,10 +255,10 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 		if err != nil {
 			log.Error("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
-			return nil, fmt.Sprintf("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
+			return http.StatusForbidden, fmt.Sprintf("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
 		}
 
-		var readmeChanges []ReadmeDiff
+		var readmeDiffs []ReadmeDiff
 
 		entries := strings.Split(revList, "\n")
 
@@ -294,7 +274,7 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 			if err != nil {
 				log.Error("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
-				return nil, fmt.Sprintf("Failed to parse files for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
+				return http.StatusForbidden, fmt.Sprintf("Failed to parse files for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
 			}
 
 			changes := strings.Split(nameStatus, "\n")
@@ -303,22 +283,27 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 				if strings.Contains(strings.ToLower(name), "readme.md") {
 
-					diff, err := git.NewCommand("--no-pager", "diff", strings.TrimSpace(entry), "-G\"^[-+]?[0-9]+(\\.[0-9]+)?\\/[-+]?[0-9]+(\\.[0-9]+)?P$\"", strings.TrimSpace(name)).
-						SetDescription(fmt.Sprintf("Parsing diffs in Readme %s", entry)).
+					diff, err := git.NewCommand("--no-pager", "diff", "-G\"^[-+]?[0-9]+(\\.[0-9]+)?\\/[-+]?[0-9]+(\\.[0-9]+)?P$\"", strings.TrimSpace(entry), "--", strings.TrimSpace(name)).
+						SetDescription(fmt.Sprintf("Parsing diffs in Readme %s", name)).
 						RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 
 					if err != nil {
-						log.Error("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
-						return nil, fmt.Sprintf("Failed to parse diff for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
+						log.Error("Failed to parse diff for readme %s: Stdout: %s\nError: %v", entry, nameStatus, err)
+						return http.StatusForbidden, fmt.Sprintf("Failed to parse diff for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
 					}
 
-					readmeChanges = append(readmeChanges, ReadmeDiff{name, strings.Split(diff, "\n")})
+					reg, err := regexp.Compile("^[-+]?[0-9]+(\\.[0-9]+)?/[-+]?[0-9]+(\\.[0-9]+)?P$")
+					if err != nil {
+						panic(err)
+					}
+
+					readmeDiffs = append(readmeDiffs, ReadmeDiff{name, reg.FindAllString(diff, -1)})
 				}
 
 			}
 		}
 
-		opts.ReadmeDiffs = readmeChanges
+		opts.ReadmeDiffs = readmeDiffs
 
 		reqURL := setting.Git.PreReceiveHookUrl + fmt.Sprintf("%s/%s",
 			url.PathEscape(ownerName),
@@ -333,18 +318,18 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 		req.SetTimeout(60*time.Second, time.Duration(60+len(opts.OldCommitIDs))*time.Second)
 		resp, err := req.Response()
 		if err != nil {
-			return nil, fmt.Sprintf("Unable to contact external post-commit-hook: %v", err.Error())
+			return http.StatusForbidden, fmt.Sprintf("Unable to contact external post-commit-hook: %v", err.Error())
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
 			body, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
-				return nil, "Unexpected failure"
+				return http.StatusForbidden, "Unexpected failure"
 			}
-			return nil, string(body)
+			return http.StatusForbidden, string(body)
 		}
 	}
-	return &HookPostReceiveResult{}, ""
+	return http.StatusOK, ""
 }
-*/
+
