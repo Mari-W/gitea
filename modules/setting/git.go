@@ -16,8 +16,8 @@ var (
 	Git = struct {
 		EnablePreReceive          bool
 		PreReceiveHookUrl         string
-		EnablePostReceive          bool
-		PostReceiveHookUrl         string
+		EnablePostReceive         bool
+		PostReceiveHookUrl        string
 		GitRoot                   string
 		Path                      string
 		DisableDiffHighlight      bool
