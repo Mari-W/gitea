@@ -283,7 +283,7 @@ func HookPostReceiveExternal(ownerName, repoName string, opts HookOptions) (int,
 
 				if strings.Contains(strings.ToLower(name), "readme.md") {
 
-					diff, err := git.NewCommand("--no-pager", "diff", fmt.Sprintf("%s..%s", entries[0], entry), strings.TrimSpace(name)).
+					diff, err := git.NewCommand("--no-pager", "diff", fmt.Sprintf("%s..%s", entries[0], entry), "--", strings.TrimSpace(name)).
 						SetDescription(fmt.Sprintf("Parsing diffs in Readme %s", name)).
 						RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 
