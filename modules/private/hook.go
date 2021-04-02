@@ -238,7 +238,7 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 }
 
 func HookPostReceiveExternal(ownerName, repoName string, opts HookOptions) (int, string) {
-	if setting.Git.EnablePreReceive {
+	if setting.Git.EnablePostReceive {
 
 		var revList string
 		var err error
@@ -305,7 +305,7 @@ func HookPostReceiveExternal(ownerName, repoName string, opts HookOptions) (int,
 
 		opts.ReadmeDiffs = readmeDiffs
 
-		reqURL := setting.Git.PreReceiveHookUrl + fmt.Sprintf("%s/%s",
+		reqURL := setting.Git.PostReceiveHookUrl + fmt.Sprintf("%s/%s",
 			url.PathEscape(ownerName),
 			url.PathEscape(repoName),
 		)
@@ -332,4 +332,3 @@ func HookPostReceiveExternal(ownerName, repoName string, opts HookOptions) (int,
 	}
 	return http.StatusOK, ""
 }
-
