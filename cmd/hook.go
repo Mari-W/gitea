@@ -387,6 +387,14 @@ Gitea or set your environment appropriately.`, "")
 				hookPrintResults(results)
 				fail("Internal Server Error", err)
 			}
+
+			resp2, err2 := private.HookPostReceiveExternal(repoUser, repoName, hookOptions)
+			if resp2 == nil {
+				_ = dWriter.Close()
+				hookPrintResults(results)
+				fail("Internal Server Error", err2)
+			}
+
 			wasEmpty = wasEmpty || resp.RepoWasEmpty
 			results = append(results, resp.Results...)
 			count = 0

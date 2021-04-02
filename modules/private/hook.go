@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -46,12 +47,18 @@ func (g GitPushOptions) Bool(key string, def bool) bool {
 	return def
 }
 
+type ReadmeDiff struct {
+	Path       string
+	ChangesOut []string
+}
+
 // HookOptions represents the options for the Hook calls
 type HookOptions struct {
 	OldCommitIDs                    []string
 	NewCommitIDs                    []string
 	RefFullNames                    []string
 	FileNames                       []string
+	ReadmeDiffs                     []ReadmeDiff
 	UserID                          int64
 	UserName                        string
 	GitObjectDirectory              string
@@ -174,6 +181,7 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 		}
 
 		var names []string
+		var readmeDiffs []ReadmeDiff
 
 		entries := strings.Split(revList, "\n")
 
@@ -183,7 +191,7 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 				continue
 			}
 
-			nameStatus, err := git.NewCommand("--no-pager", "log", "-1", "--name-status", "--pretty=format:", strings.TrimSpace(entry)).
+			nameStatus, err := git.NewCommand("--no-pager", "log", "-1", "--name-only", "--pretty=format:", strings.TrimSpace(entry)).
 				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
 				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 
@@ -196,10 +204,31 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 
 			for _, name := range changes {
 				names = append(names, strings.TrimSpace(name))
+
+				if strings.Contains(strings.ToLower(name), "readme.md") {
+
+					diff, err := git.NewCommand("--no-pager", "diff", strings.TrimSpace(entry), "-G\"^[-+]?[0-9]+(\\.[0-9]+)?\\/[-+]?[0-9]+(\\.[0-9]+)?P$\"", strings.TrimSpace(name)).
+						SetDescription(fmt.Sprintf("Parsing diffs in Readme %s", name)).
+						RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+
+					if err != nil {
+						log.Error("Failed to parse diff for readme %s: Stdout: %s\nError: %v", entry, nameStatus, err)
+						return http.StatusInternalServerError, fmt.Sprintf("Failed to parse diff for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
+					}
+
+					reg, err := regexp.Compile("^[-+]?[0-9]+(\\.[0-9]+)?/[-+]?[0-9]+(\\.[0-9]+)?P$")
+					if err != nil {
+						panic(err)
+					}
+
+					readmeDiffs = append(readmeDiffs, ReadmeDiff{name, reg.FindAllString(diff, -1)})
+				}
+
 			}
 		}
 
 		opts.FileNames = names
+		opts.ReadmeDiffs = readmeDiffs
 
 		reqURL := setting.Git.PreReceiveHookUrl + fmt.Sprintf("%s/%s",
 			url.PathEscape(ownerName),
@@ -227,3 +256,95 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 	}
 	return http.StatusOK, ""
 }
+
+/*func HookPostReceiveExternal(ownerName, repoName string, opts HookOptions) (*HookPostReceiveResult, string) {
+	if setting.Git.EnablePreReceive {
+
+		var revList string
+		var err error
+
+		if opts.OldCommitIDs[0] == "0000000000000000000000000000000000000000" {
+			revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s", opts.NewCommitIDs[0]), "--all").
+				SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
+				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+		} else {
+			revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
+				SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
+				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+		}
+
+		if err != nil {
+			log.Error("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
+			return nil, fmt.Sprintf("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
+		}
+
+		var readmeChanges []ReadmeDiff
+
+		entries := strings.Split(revList, "\n")
+
+		for _, entry := range entries {
+
+			if len(strings.TrimSpace(entry)) == 0 {
+				continue
+			}
+
+			nameStatus, err := git.NewCommand("--no-pager", "log", "-1", "--name-only", "--pretty=format:", strings.TrimSpace(entry)).
+				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
+				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+
+			if err != nil {
+				log.Error("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
+				return nil, fmt.Sprintf("Failed to parse files for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
+			}
+
+			changes := strings.Split(nameStatus, "\n")
+
+			for _, name := range changes {
+
+				if strings.Contains(strings.ToLower(name), "readme.md") {
+
+					diff, err := git.NewCommand("--no-pager", "diff", strings.TrimSpace(entry), "-G\"^[-+]?[0-9]+(\\.[0-9]+)?\\/[-+]?[0-9]+(\\.[0-9]+)?P$\"", strings.TrimSpace(name)).
+						SetDescription(fmt.Sprintf("Parsing diffs in Readme %s", entry)).
+						RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+
+					if err != nil {
+						log.Error("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
+						return nil, fmt.Sprintf("Failed to parse diff for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
+					}
+
+					readmeChanges = append(readmeChanges, ReadmeDiff{name, strings.Split(diff, "\n")})
+				}
+
+			}
+		}
+
+		opts.ReadmeDiffs = readmeChanges
+
+		reqURL := setting.Git.PreReceiveHookUrl + fmt.Sprintf("%s/%s",
+			url.PathEscape(ownerName),
+			url.PathEscape(repoName),
+		)
+
+		req := newInternalRequest(reqURL, "POST")
+		req = req.Header("Content-Type", "application/json")
+		json := jsoniter.ConfigCompatibleWithStandardLibrary
+		jsonBytes, _ := json.Marshal(opts)
+		req.Body(jsonBytes)
+		req.SetTimeout(60*time.Second, time.Duration(60+len(opts.OldCommitIDs))*time.Second)
+		resp, err := req.Response()
+		if err != nil {
+			return nil, fmt.Sprintf("Unable to contact external post-commit-hook: %v", err.Error())
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, "Unexpected failure"
+			}
+			return nil, string(body)
+		}
+	}
+	return &HookPostReceiveResult{}, ""
+}
+*/
