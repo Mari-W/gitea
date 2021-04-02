@@ -433,6 +433,20 @@ Gitea or set your environment appropriately.`, "")
 		hookPrintResults(results)
 		fail("Internal Server Error", err)
 	}
+
+	statusCodeExt, msgExt := private.HookPostReceiveExternal(repoUser, repoName, hookOptions)
+	switch statusCodeExt {
+	case http.StatusInternalServerError:
+		_ = dWriter.Close()
+		hookPrintResults(results)
+		fail("Internal Server Error", msgExt)
+	case http.StatusForbidden:
+		_ = dWriter.Close()
+		hookPrintResults(results)
+		fail(msgExt, "")
+	}
+
+
 	wasEmpty = wasEmpty || resp.RepoWasEmpty
 	results = append(results, resp.Results...)
 
