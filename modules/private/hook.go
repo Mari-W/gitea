@@ -46,18 +46,12 @@ func (g GitPushOptions) Bool(key string, def bool) bool {
 	return def
 }
 
-type ReadmeDiff struct {
-	Path       string
-	ChangesOut []string
-}
-
 // HookOptions represents the options for the Hook calls
 type HookOptions struct {
 	OldCommitIDs                    []string
 	NewCommitIDs                    []string
 	RefFullNames                    []string
 	FileNames                       []string
-	ReadmeDiffs                     []ReadmeDiff
 	UserID                          int64
 	UserName                        string
 	GitObjectDirectory              string
