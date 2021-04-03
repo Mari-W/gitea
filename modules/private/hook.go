@@ -161,53 +161,13 @@ func SetDefaultBranch(ownerName, repoName, branch string) error {
 func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions) (int, string) {
 	if setting.Git.EnablePreReceive {
 
-		var revList string
-		var err error
+		var errOut, names = ModifiedFilesList(ownerName, repoName, opts)
 
-		if opts.OldCommitIDs[0] == "0000000000000000000000000000000000000000" {
-			revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s", opts.NewCommitIDs[0]), "--all").
-				SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
-				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
-		} else {
-			revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
-				SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
-				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
-		}
-
-		if err != nil {
-			log.Error("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
-			return http.StatusForbidden, fmt.Sprintf("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
-		}
-
-		var names []string
-		var readmeDiffs []ReadmeDiff
-
-		entries := strings.Split(revList, "\n")
-
-		for _, entry := range entries {
-
-			if len(strings.TrimSpace(entry)) == 0 {
-				continue
-			}
-
-			nameStatus, err := git.NewCommand("--no-pager", "log", "-1", "--name-only", "--pretty=format:", strings.TrimSpace(entry)).
-				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
-				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
-
-			if err != nil {
-				log.Error("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
-				return http.StatusForbidden, fmt.Sprintf("Failed to parse files for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
-			}
-
-			changes := strings.Split(nameStatus, "\n")
-
-			for _, name := range changes {
-				names = append(names, strings.TrimSpace(name))
-			}
+		if errOut != "" {
+			return http.StatusForbidden, errOut
 		}
 
 		opts.FileNames = names
-		opts.ReadmeDiffs = readmeDiffs
 
 		reqURL := setting.Git.PreReceiveHookUrl + fmt.Sprintf("%s/%s",
 			url.PathEscape(ownerName),
@@ -239,70 +199,13 @@ func HookPreReceiveExternal(ownerName string, repoName string, opts HookOptions)
 func HookPostReceiveExternal(ownerName, repoName string, opts HookOptions) (int, string) {
 	if setting.Git.EnablePostReceive {
 
-		var revList string
-		var err error
+		var errOut, names = ModifiedFilesList(ownerName, repoName, opts)
 
-		if opts.OldCommitIDs[0] == "0000000000000000000000000000000000000000" {
-			revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s", opts.NewCommitIDs[0]), "--all").
-				SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
-				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
-		} else {
-			revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
-				SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
-				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+		if errOut != "" {
+			return http.StatusForbidden, errOut
 		}
 
-		if err != nil {
-			log.Error("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
-			return http.StatusForbidden, fmt.Sprintf("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
-		}
-
-		var readmeDiffs []ReadmeDiff
-
-		entries := strings.Split(revList, "\n")
-
-		for _, entry := range entries {
-
-			if len(strings.TrimSpace(entry)) == 0 {
-				continue
-			}
-
-			nameStatus, err := git.NewCommand("--no-pager", "log", "-1", "--name-only", "--pretty=format:", strings.TrimSpace(entry)).
-				SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
-				RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
-
-			if err != nil {
-				log.Error("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
-				return http.StatusForbidden, fmt.Sprintf("Failed to parse files for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
-			}
-
-			changes := strings.Split(nameStatus, "\n")
-
-			for _, name := range changes {
-
-				if strings.Contains(strings.ToLower(name), "readme.md") {
-
-					diff, err := git.NewCommand("--no-pager", "diff", fmt.Sprintf("%s..%s", entries[0], entry), "--", strings.TrimSpace(name)).
-						SetDescription(fmt.Sprintf("Parsing diffs in Readme %s", name)).
-						RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
-
-					if err != nil {
-						log.Error("Failed to parse diff for readme %s: Stdout: %s\nError: %v", entry, nameStatus, err)
-						return http.StatusForbidden, fmt.Sprintf("Failed to parse diff for commit %s: \nStdout: %s\nError: %v\nCommits:%v", entry, nameStatus, err, entries)
-					}
-
-					/*reg, err := regexp.Compile("^[-+]?[0-9]+(\\.[0-9]+)?/[-+]?[0-9]+(\\.[0-9]+)?P$")
-					if err != nil {
-						panic(err)
-					}*/
-
-					readmeDiffs = append(readmeDiffs, ReadmeDiff{name, strings.Split(diff, "\n")})
-				}
-
-			}
-		}
-
-		opts.ReadmeDiffs = readmeDiffs
+		opts.FileNames = names
 
 		reqURL := setting.Git.PostReceiveHookUrl + fmt.Sprintf("%s/%s",
 			url.PathEscape(ownerName),
@@ -330,4 +233,52 @@ func HookPostReceiveExternal(ownerName, repoName string, opts HookOptions) (int,
 		}
 	}
 	return http.StatusOK, ""
+}
+
+func ModifiedFilesList(ownerName string, repoName string, opts HookOptions) (string, []string) {
+	var revList string
+	var err error
+
+	if opts.OldCommitIDs[0] == "0000000000000000000000000000000000000000" {
+		revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s", opts.NewCommitIDs[0]), "--all").
+			SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
+			RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+	} else {
+		revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
+			SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
+			RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+	}
+
+	if err != nil {
+		log.Error("failed to parse ref-list: Stdout: %s\nError: %v", revList, err)
+		return fmt.Sprintf("failed to parse ref-list: Stdout: %s\nError: %v", revList, err), nil
+	}
+
+	var names []string
+
+	entries := strings.Split(revList, "\n")
+
+	for _, entry := range entries {
+
+		if len(strings.TrimSpace(entry)) == 0 {
+			continue
+		}
+
+		nameStatus, err := git.NewCommand("--no-pager", "log", "-1", "--name-only", "--pretty=format:", strings.TrimSpace(entry)).
+			SetDescription(fmt.Sprintf("Parsing files for commit  %s", entry)).
+			RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
+
+		if err != nil {
+			log.Error("Failed to parse  files for commit %s: Stdout: %s\nError: %v", entry, nameStatus, err)
+			return fmt.Sprintf("Failed to parse files for Commit %s: \nStdout: %s\nError: %v\n All Commits:%v", entry, nameStatus, err, entries), nil
+		}
+
+		changes := strings.Split(nameStatus, "\n")
+
+		for _, name := range changes {
+			names = append(names, strings.TrimSpace(name))
+		}
+		return "", names
+	}
+	return fmt.Sprintf("Failed to parse modified files. \nError: %v\n All Commits:%v", err, entries), nil
 }
