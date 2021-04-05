@@ -146,7 +146,7 @@
 
 				{{if and (.Permission.CanReadAny $.UnitTypePullRequests $.UnitTypeIssues $.UnitTypeReleases) (not .IsEmptyRepo)}}
 					<a class="{{if .PageIsActivity}}active{{end}} item" href="{{.RepoLink}}/activity">
-						Feedback
+						{{svg "octicon-pulse"}} Feedback
 					</a>
 				{{end}}
 
