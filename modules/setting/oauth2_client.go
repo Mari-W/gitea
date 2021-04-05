@@ -58,6 +58,7 @@ var OAuth2Client struct {
 	Username               OAuth2UsernameType
 	UpdateAvatar           bool
 	AccountLinking         OAuth2AccountLinkingType
+	AuthErrorRedirect      string
 }
 
 func newOAuth2Client() {
