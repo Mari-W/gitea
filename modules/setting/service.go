@@ -74,6 +74,7 @@ var OAuth2Client struct {
 	OpenIDConnectScopes    []string
 	EnableAutoRegistration bool
 	UseNickname            bool
+	AuthErrorRedirect      string
 }
 
 func newService() {
