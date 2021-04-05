@@ -68,14 +68,6 @@ var Service struct {
 	} `ini:"service.explore"`
 }
 
-// OAuth2Client settings
-var OAuth2Client struct {
-	RegisterEmailConfirm   bool
-	OpenIDConnectScopes    []string
-	EnableAutoRegistration bool
-	UseNickname            bool
-}
-
 func newService() {
 	sec := Cfg.Section("service")
 	Service.ActiveCodeLives = sec.Key("ACTIVE_CODE_LIVE_MINUTES").MustInt(180)
@@ -144,16 +136,4 @@ func newService() {
 			Service.OpenIDBlacklist[i] = regexp.MustCompilePOSIX(p)
 		}
 	}
-
-	sec = Cfg.Section("oauth2_client")
-	OAuth2Client.RegisterEmailConfirm = sec.Key("REGISTER_EMAIL_CONFIRM").MustBool(Service.RegisterEmailConfirm)
-	pats = sec.Key("OPENID_CONNECT_SCOPES").Strings(" ")
-	OAuth2Client.OpenIDConnectScopes = make([]string, 0, len(pats))
-	for _, scope := range pats {
-		if scope != "" {
-			OAuth2Client.OpenIDConnectScopes = append(OAuth2Client.OpenIDConnectScopes, scope)
-		}
-	}
-	OAuth2Client.EnableAutoRegistration = sec.Key("ENABLE_AUTO_REGISTRATION").MustBool()
-	OAuth2Client.UseNickname = sec.Key("USE_NICKNAME").MustBool()
 }
