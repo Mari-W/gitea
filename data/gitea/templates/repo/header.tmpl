@@ -1,19 +1,19 @@
 <div class="header-wrapper">
-{{with .Repository}}
-	<div class="ui container">
-		<div class="repo-header">
-			<div class="repo-title-wrap df fc">
-				<div class="repo-title">
-					{{$avatar := (repoAvatar . 32 "mr-3")}}
-					{{if $avatar}}
-						{{$avatar}}
-					{{else}}
-						{{template "repo/icon" .}}
-					{{end}}
-					<a href="{{AppSubUrl}}/{{.Owner.Name}}">{{.Owner.Name}}</a>
-					<div class="mx-2">/</div>
-					<a href="{{$.RepoLink}}">{{.Name}}</a>
-					{{/*<div class="labels df ac fw">
+	{{with .Repository}}
+		<div class="ui container">
+			<div class="repo-header">
+				<div class="repo-title-wrap df fc">
+					<div class="repo-title">
+						{{$avatar := (repoAvatar . 32 "mr-3")}}
+						{{if $avatar}}
+							{{$avatar}}
+						{{else}}
+							{{template "repo/icon" .}}
+						{{end}}
+						<a href="{{AppSubUrl}}/{{.Owner.Name}}">{{.Owner.Name}}</a>
+						<div class="mx-2">/</div>
+						<a href="{{$.RepoLink}}">{{.Name}}</a>
+						{{/*<div class="labels df ac fw">
 						{{if .IsTemplate}}
 							{{if .IsPrivate}}
 								<span class="ui basic label">{{$.i18n.Tr "repo.desc.private_template"}}</span>
@@ -35,14 +35,19 @@
 						  <span class="ui basic label">{{$.i18n.Tr "repo.desc.archived"}}</span>
 						{{end}}
 					</div>*/}}
+					</div>
+					{{if .IsMirror}}
+					<div class="fork-flag">{{$.i18n.Tr "repo.mirror_from"}} <a target="_blank" rel="noopener noreferrer"
+																																		 href="{{if .SanitizedOriginalURL}}{{.SanitizedOriginalURL}}{{else}}{{MirrorAddress $.Mirror}}{{end}}">{{if .SanitizedOriginalURL}}{{.SanitizedOriginalURL}}{{else}}{{MirrorAddress $.Mirror}}{{end}}</a>
+					</div>{{end}}
+					{{if .IsFork}}
+					<div class="fork-flag">{{$.i18n.Tr "repo.forked_from"}} <a
+										href="{{.BaseRepo.Link}}">{{SubStr .BaseRepo.RelLink 1 -1}}</a></div>{{end}}
+					{{/*{{if .IsGenerated}}<div class="fork-flag">{{$.i18n.Tr "repo.generated_from"}} <a href="{{.TemplateRepo.Link}}">{{SubStr .TemplateRepo.RelLink 1 -1}}</a></div>{{end}}*/}}
 				</div>
-				{{if .IsMirror}}<div class="fork-flag">{{$.i18n.Tr "repo.mirror_from"}} <a target="_blank" rel="noopener noreferrer" href="{{if .SanitizedOriginalURL}}{{.SanitizedOriginalURL}}{{else}}{{MirrorAddress $.Mirror}}{{end}}">{{if .SanitizedOriginalURL}}{{.SanitizedOriginalURL}}{{else}}{{MirrorAddress $.Mirror}}{{end}}</a></div>{{end}}
-				{{if .IsFork}}<div class="fork-flag">{{$.i18n.Tr "repo.forked_from"}} <a href="{{.BaseRepo.Link}}">{{SubStr .BaseRepo.RelLink 1 -1}}</a></div>{{end}}
-				{{/*{{if .IsGenerated}}<div class="fork-flag">{{$.i18n.Tr "repo.generated_from"}} <a href="{{.TemplateRepo.Link}}">{{SubStr .TemplateRepo.RelLink 1 -1}}</a></div>{{end}}*/}}
-			</div>
-			{{if not .IsBeingCreated}}
-				<div class="repo-buttons">
-					{{/*<form method="post" action="{{$.RepoLink}}/action/{{if $.IsWatchingRepo}}un{{end}}watch?redirect_to={{$.Link}}">
+				{{if not .IsBeingCreated}}
+					<div class="repo-buttons">
+						{{/*<form method="post" action="{{$.RepoLink}}/action/{{if $.IsWatchingRepo}}un{{end}}watch?redirect_to={{$.Link}}">
 						{{$.CsrfTokenHtml}}
 						<div class="ui labeled button{{if not $.IsSigned}} poping up{{end}}" tabindex="0"{{if not $.IsSigned}} data-content="{{$.i18n.Tr "repo.watch_guest_user" }}" data-position="top center" data-variation="tiny"{{end}}>
 							<button type="submit" class="ui compact small basic button"{{if not $.IsSigned}} disabled{{end}}>
@@ -74,21 +79,22 @@
 							</a>
 						</div>
 					{{end}}*/}}
-				</div>
-			{{end}}
-		</div><!-- end grid -->
-	</div><!-- end container -->
-{{end}}
-	{{/*<div class="ui tabs container">
+					</div>
+				{{end}}
+			</div><!-- end grid -->
+		</div><!-- end container -->
+	{{end}}
+	<div class="ui tabs container">
 		{{if not .Repository.IsBeingCreated}}
 			<div class="ui tabular stackable menu navbar">
 				{{if .Permission.CanRead $.UnitTypeCode}}
-				<a class="{{if .PageIsViewCode}}active{{end}} item" href="{{.RepoLink}}{{if (ne .BranchName .Repository.DefaultBranch)}}/src/{{.BranchNameSubURL | EscapePound}}{{end}}">
-					{{svg "octicon-code"}} {{.i18n.Tr "repo.code"}}
-				</a>
+					<a class="{{if .PageIsViewCode}}active{{end}} item"
+						 href="{{.RepoLink}}{{if (ne .BranchName .Repository.DefaultBranch)}}/src/{{.BranchNameSubURL | EscapePound}}{{end}}">
+						{{svg "octicon-code"}} {{.i18n.Tr "repo.code"}}
+					</a>
 				{{end}}
 
-				{{if .Permission.CanRead $.UnitTypeIssues}}
+				{{/*{{if .Permission.CanRead $.UnitTypeIssues}}
 					<a class="{{if .PageIsIssueList}}active{{end}} item" href="{{.RepoLink}}/issues">
 						{{svg "octicon-issue-opened"}} {{.i18n.Tr "repo.issues"}}
 						{{if .Repository.NumOpenIssues}}
@@ -98,7 +104,8 @@
 				{{end}}
 
 				{{if .Permission.CanRead $.UnitTypeExternalTracker}}
-					<a class="{{if .PageIsIssueList}}active{{end}} item" href="{{.RepoExternalIssuesLink}}" target="_blank" rel="noopener noreferrer">
+					<a class="{{if .PageIsIssueList}}active{{end}} item" href="{{.RepoExternalIssuesLink}}" target="_blank"
+						 rel="noopener noreferrer">
 						{{svg "octicon-link-external"}} {{.i18n.Tr "repo.issues"}} </span>
 					</a>
 				{{end}}
@@ -122,19 +129,20 @@
 				{{ end }}
 
 				{{if and (.Permission.CanRead $.UnitTypeReleases) (not .IsEmptyRepo) }}
-				<a class="{{if .PageIsReleaseList}}active{{end}} item" href="{{.RepoLink}}/releases">
-					{{svg "octicon-tag"}} {{.i18n.Tr "repo.releases"}}
-					{{if .NumReleases}}
-						<span class="ui blue small label">{{CountFmt .NumReleases}}</span>
-					{{end}}
-				</a>
+					<a class="{{if .PageIsReleaseList}}active{{end}} item" href="{{.RepoLink}}/releases">
+						{{svg "octicon-tag"}} {{.i18n.Tr "repo.releases"}}
+						{{if .NumReleases}}
+							<span class="ui blue small label">{{CountFmt .NumReleases}}</span>
+						{{end}}
+					</a>
 				{{end}}
 
 				{{if or (.Permission.CanRead $.UnitTypeWiki) (.Permission.CanRead $.UnitTypeExternalWiki)}}
-					<a class="{{if .PageIsWiki}}active{{end}} item" href="{{.RepoLink}}/wiki" {{if (.Permission.CanRead $.UnitTypeExternalWiki)}} target="_blank" rel="noopener noreferrer" {{end}}>
+					<a class="{{if .PageIsWiki}}active{{end}} item"
+						 href="{{.RepoLink}}/wiki" {{if (.Permission.CanRead $.UnitTypeExternalWiki)}} target="_blank" rel="noopener noreferrer" {{end}}>
 						{{svg "octicon-book"}} {{.i18n.Tr "repo.wiki"}}
 					</a>
-				{{end}}
+				{{end}}*/}}
 
 				{{if and (.Permission.CanReadAny $.UnitTypePullRequests $.UnitTypeIssues $.UnitTypeReleases) (not .IsEmptyRepo)}}
 					<a class="{{if .PageIsActivity}}active{{end}} item" href="{{.RepoLink}}/activity">
@@ -153,7 +161,7 @@
 				{{end}}
 			</div>
 		{{end}}
-	</div>*/}}
+	</div>
 	<div style="height: 15px"></div>
 	<div class="ui tabs divider"></div>
 </div>
