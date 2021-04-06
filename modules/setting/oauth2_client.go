@@ -67,6 +67,7 @@ func newOAuth2Client() {
 	OAuth2Client.OpenIDConnectScopes = parseScopes(sec, "OPENID_CONNECT_SCOPES")
 	OAuth2Client.EnableAutoRegistration = sec.Key("ENABLE_AUTO_REGISTRATION").MustBool()
 	OAuth2Client.Username = OAuth2UsernameType(sec.Key("USERNAME").MustString(string(OAuth2UsernameNickname)))
+	OAuth2Client.AuthErrorRedirect = sec.Key("AUTH_ERROR_REDIRECT").MustString("/user/login")
 	if !OAuth2Client.Username.isValid() {
 		log.Warn("Username setting is not valid: '%s', will fallback to '%s'", OAuth2Client.Username, OAuth2UsernameNickname)
 		OAuth2Client.Username = OAuth2UsernameNickname
