@@ -14,16 +14,22 @@
 				{{range .Tokens}}
 					<div class="item">
 						<div class="right floated content">
-								<button class="ui red tiny button delete-button" id="delete-token" data-url="{{$.Link}}/delete" data-id="{{.ID}}">
-									{{svg "octicon-trash" 16 "mr-2"}}
-									{{$.i18n.Tr "settings.delete_token"}}
-								</button>
+							<button class="ui red tiny button delete-button" id="delete-token" data-url="{{$.Link}}/delete"
+											data-id="{{.ID}}">
+								{{svg "octicon-trash" 16 "mr-2"}}
+								{{$.i18n.Tr "settings.delete_token"}}
+							</button>
 						</div>
-						<i class="big send icon {{if .HasRecentActivity}}green{{end}}" {{if .HasRecentActivity}}data-content="{{$.i18n.Tr "settings.token_state_desc"}}" data-variation="inverted tiny"{{end}}></i>
+						<i class="big send icon {{if .HasRecentActivity}}green{{end}}"
+							 {{if .HasRecentActivity}}data-content="{{$.i18n.Tr "settings.token_state_desc"}}"
+							 data-variation="inverted tiny"{{end}}></i>
 						<div class="content">
 							<strong>{{.Name}}</strong>
 							<div class="activity meta">
-								<i>{{$.i18n.Tr "settings.add_on"}} <span>{{.CreatedUnix.FormatShort}}</span> —  {{svg "octicon-info"}} {{if .HasUsed}}{{$.i18n.Tr "settings.last_used"}} <span {{if .HasRecentActivity}}class="green"{{end}}>{{.UpdatedUnix.FormatShort}}</span>{{else}}{{$.i18n.Tr "settings.no_activity"}}{{end}}</i>
+								<i>{{$.i18n.Tr "settings.add_on"}} <span>{{.CreatedUnix.FormatShort}}</span>
+									— {{svg "octicon-info"}} {{if .HasUsed}}{{$.i18n.Tr "settings.last_used"}} <span
+													{{if .HasRecentActivity}}class="green"{{end}}>{{.UpdatedUnix.FormatShort}}</span>{{else}}{{$.i18n.Tr "settings.no_activity"}}{{end}}
+								</i>
 							</div>
 						</div>
 					</div>
@@ -47,10 +53,10 @@
 			</form>
 		</div>
 
-		{{/*{{if .EnableOAuth2}}
+		{{if .EnableOAuth2}}
 			{{template "user/settings/grants_oauth2" .}}
 			{{template "user/settings/applications_oauth2" .}}
-		{{end}}*/}}
+		{{end}}
 	</div>
 </div>
 
