@@ -11,7 +11,7 @@
 	{{if and .IsSigned .MustChangePassword}}
 		{{/* No links */}}
 	{{else if .IsSigned}}
-		<a class="item {{if .PageIsDashboard}}active{{end}}" href="{{AppSubUrl}}/">{{.i18n.Tr "dashboard"}}</a>
+		<a class="item {{if .PageIsDashboard}}active{{end}}" href="{{AppSubUrl}}/">Repositories</a>
 		<a class="item {{if .PageIsHome}}active{{end}}" href="{{AppSubUrl}}/user/settings/organization">Courses</a>
 		<a class="item {{if .PageIsHome}}active{{end}}" href="https://riot.contravariant.net/">Forum</a>
 		<a class="item {{if .PageIsHome}}active{{end}}" href="https://drone.contravariant.net/">Builds</a>
