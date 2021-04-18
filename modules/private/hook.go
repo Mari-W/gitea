@@ -233,15 +233,15 @@ func ModifiedFilesList(ownerName string, repoName string, opts HookOptions) (str
 	var revList string
 	var err error
 
-	fmt.Printf("%v", opts.OldCommitIDs)
-	fmt.Printf("%v", opts.NewCommitIDs)
+	log.Error("%v", opts.OldCommitIDs)
+	log.Error("%v", opts.NewCommitIDs)
 
 	if opts.OldCommitIDs[0] == "0000000000000000000000000000000000000000" {
-		revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s", opts.NewCommitIDs[0]), "--all").
+		revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s", opts.OldCommitIDs[len(opts.OldCommitIDs)-1]), "--all").
 			SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
 			RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 	} else {
-		revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.NewCommitIDs[0])).
+		revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s..%s", opts.OldCommitIDs[0], opts.OldCommitIDs[len(opts.OldCommitIDs)-1])).
 			SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
 			RunInDir(fmt.Sprintf("%s/repositories/%s/%s.git", setting.Git.GitRoot, ownerName, repoName))
 	}
