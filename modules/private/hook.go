@@ -233,12 +233,6 @@ func ModifiedFilesList(ownerName string, repoName string, opts HookOptions) (str
 	var revList string
 	var err error
 
-	log.Error("%v", opts.OldCommitIDs)
-	log.Error("%v", opts.NewCommitIDs)
-
-	fmt.Printf("%v", opts.OldCommitIDs)
-	fmt.Printf("%v", opts.NewCommitIDs)
-
 	if opts.OldCommitIDs[0] == "0000000000000000000000000000000000000000" {
 		revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s", opts.NewCommitIDs[len(opts.NewCommitIDs)-1]), "--all").
 			SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
@@ -278,7 +272,8 @@ func ModifiedFilesList(ownerName string, repoName string, opts HookOptions) (str
 		for _, name := range changes {
 			names = append(names, strings.TrimSpace(name))
 		}
-		return "", names
+
 	}
-	return fmt.Sprintf("Failed to parse modified files. \nError: %v\n All Commits:%v", err, entries), nil
+
+	return "", names
 }
