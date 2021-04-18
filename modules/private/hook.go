@@ -236,6 +236,9 @@ func ModifiedFilesList(ownerName string, repoName string, opts HookOptions) (str
 	log.Error("%v", opts.OldCommitIDs)
 	log.Error("%v", opts.NewCommitIDs)
 
+	fmt.Printf("%v", opts.OldCommitIDs)
+	fmt.Printf("%v", opts.NewCommitIDs)
+
 	if opts.OldCommitIDs[0] == "0000000000000000000000000000000000000000" {
 		revList, err = git.NewCommand("rev-list", fmt.Sprintf("%s", opts.NewCommitIDs[len(opts.NewCommitIDs)-1]), "--all").
 			SetDescription(fmt.Sprintf("Reading revs %s", repoName)).
