@@ -118,7 +118,7 @@ services:
     environment:
       - USER_UID=1000
       - USER_GID=1000
-+     - GITEA__database__TYPE=mysql
++     - GITEA__database__DB_TYPE=mysql
 +     - GITEA__database__HOST=db:3306
 +     - GITEA__database__NAME=gitea
 +     - GITEA__database__USER=gitea
@@ -137,7 +137,7 @@ services:
 +      - db
 +
 +  db:
-+    image: mysql:5.7
++    image: mysql:8
 +    restart: always
 +    environment:
 +      - MYSQL_ROOT_PASSWORD=gitea
@@ -169,7 +169,7 @@ services:
     environment:
       - USER_UID=1000
       - USER_GID=1000
-+     - GITEA__database__TYPE=postgres
++     - GITEA__database__DB_TYPE=postgres
 +     - GITEA__database__HOST=db:5432
 +     - GITEA__database__NAME=gitea
 +     - GITEA__database__USER=gitea
@@ -188,7 +188,7 @@ services:
 +      - db
 +
 +  db:
-+    image: postgres:9.6
++    image: postgres:13
 +    restart: always
 +    environment:
 +      - POSTGRES_USER=gitea

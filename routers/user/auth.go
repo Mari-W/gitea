@@ -622,7 +622,7 @@ func SignInOAuthCallback(ctx *context.Context) {
 	}
 
 	if u == nil {
-		if setting.OAuth2Client.EnableAutoRegistration {
+		if !(setting.Service.DisableRegistration || setting.Service.AllowOnlyInternalRegistration) && setting.OAuth2Client.EnableAutoRegistration {
 			// create new user with details from oauth2 provider
 			var missingFields []string
 			if gothUser.UserID == "" {
@@ -833,6 +833,7 @@ func LinkAccount(ctx *context.Context) {
 	ctx.Data["RecaptchaSitekey"] = setting.Service.RecaptchaSitekey
 	ctx.Data["HcaptchaSitekey"] = setting.Service.HcaptchaSitekey
 	ctx.Data["DisableRegistration"] = setting.Service.DisableRegistration
+	ctx.Data["AllowOnlyInternalRegistration"] = setting.Service.AllowOnlyInternalRegistration
 	ctx.Data["ShowRegistrationButton"] = false
 
 	// use this to set the right link into the signIn and signUp templates in the link_account template
@@ -987,9 +988,14 @@ func LinkAccountPostRegister(ctx *context.Context) {
 	ctx.Data["SignInLink"] = setting.AppSubURL + "/user/link_account_signin"
 	ctx.Data["SignUpLink"] = setting.AppSubURL + "/user/link_account_signup"
 
-	gothUser := ctx.Session.Get("linkAccountGothUser")
-	if gothUser == nil {
+	gothUserInterface := ctx.Session.Get("linkAccountGothUser")
+	if gothUserInterface == nil {
 		ctx.ServerError("UserSignUp", errors.New("not in LinkAccount session"))
+		return
+	}
+	gothUser, ok := gothUserInterface.(goth.User)
+	if !ok {
+		ctx.ServerError("UserSignUp", fmt.Errorf("session linkAccountGothUser type is %t but not goth.User", gothUserInterface))
 		return
 	}
 
@@ -998,7 +1004,7 @@ func LinkAccountPostRegister(ctx *context.Context) {
 		return
 	}
 
-	if setting.Service.DisableRegistration {
+	if setting.Service.DisableRegistration || setting.Service.AllowOnlyInternalRegistration {
 		ctx.Error(http.StatusForbidden)
 		return
 	}
@@ -1053,7 +1059,7 @@ func LinkAccountPostRegister(ctx *context.Context) {
 		}
 	}
 
-	loginSource, err := models.GetActiveOAuth2LoginSourceByName(gothUser.(goth.User).Provider)
+	loginSource, err := models.GetActiveOAuth2LoginSourceByName(gothUser.Provider)
 	if err != nil {
 		ctx.ServerError("CreateUser", err)
 	}
@@ -1065,10 +1071,10 @@ func LinkAccountPostRegister(ctx *context.Context) {
 		IsActive:    !(setting.Service.RegisterEmailConfirm || setting.Service.RegisterManualConfirm),
 		LoginType:   models.LoginOAuth2,
 		LoginSource: loginSource.ID,
-		LoginName:   gothUser.(goth.User).UserID,
+		LoginName:   gothUser.UserID,
 	}
 
-	if !createAndHandleCreatedUser(ctx, tplLinkAccount, form, u, gothUser.(*goth.User), false) {
+	if !createAndHandleCreatedUser(ctx, tplLinkAccount, form, u, &gothUser, false) {
 		// error already handled
 		return
 	}
@@ -1245,7 +1251,7 @@ func createUserInContext(ctx *context.Context, tpl base.TplName, form interface{
 					}
 				}
 
-				// TODO: probably we should respect 'remeber' user's choice...
+				// TODO: probably we should respect 'remember' user's choice...
 				linkAccount(ctx, user, *gothUser, true)
 				return // user is already created here, all redirects are handled
 			} else if setting.OAuth2Client.AccountLinking == setting.OAuth2AccountLinkingLogin {
@@ -1332,12 +1338,11 @@ func handleUserCreated(ctx *context.Context, u *models.User, gothUser *goth.User
 // Activate render activate user page
 func Activate(ctx *context.Context) {
 	code := ctx.Query("code")
-	password := ctx.Query("password")
 
 	if len(code) == 0 {
 		ctx.Data["IsActivatePage"] = true
-		if ctx.User.IsActive {
-			ctx.Error(http.StatusNotFound)
+		if ctx.User == nil || ctx.User.IsActive {
+			ctx.NotFound("invalid user", nil)
 			return
 		}
 		// Resend confirmation email.
@@ -1369,6 +1374,34 @@ func Activate(ctx *context.Context) {
 
 	// if account is local account, verify password
 	if user.LoginSource == 0 {
+		ctx.Data["Code"] = code
+		ctx.Data["NeedsPassword"] = true
+		ctx.HTML(http.StatusOK, TplActivate)
+		return
+	}
+
+	handleAccountActivation(ctx, user)
+}
+
+// ActivatePost handles account activation with password check
+func ActivatePost(ctx *context.Context) {
+	code := ctx.Query("code")
+	if len(code) == 0 {
+		ctx.Redirect(setting.AppSubURL + "/user/activate")
+		return
+	}
+
+	user := models.VerifyUserActiveCode(code)
+	// if code is wrong
+	if user == nil {
+		ctx.Data["IsActivateFailed"] = true
+		ctx.HTML(http.StatusOK, TplActivate)
+		return
+	}
+
+	// if account is local account, verify password
+	if user.LoginSource == 0 {
+		password := ctx.Query("password")
 		if len(password) == 0 {
 			ctx.Data["Code"] = code
 			ctx.Data["NeedsPassword"] = true
@@ -1382,6 +1415,10 @@ func Activate(ctx *context.Context) {
 		}
 	}
 
+	handleAccountActivation(ctx, user)
+}
+
+func handleAccountActivation(ctx *context.Context, user *models.User) {
 	user.IsActive = true
 	var err error
 	if user.Rands, err = models.GetUserSalt(); err != nil {
@@ -1390,7 +1427,7 @@ func Activate(ctx *context.Context) {
 	}
 	if err := models.UpdateUserCols(user, "is_active", "rands"); err != nil {
 		if models.IsErrUserNotExist(err) {
-			ctx.Error(http.StatusNotFound)
+			ctx.NotFound("UpdateUserCols", err)
 		} else {
 			ctx.ServerError("UpdateUser", err)
 		}
