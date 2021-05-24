@@ -59,6 +59,8 @@ RUN addgroup \
 ENV USER git
 ENV GITEA_CUSTOM /data/gitea
 
+COPY init.sh   /docker-entrypoint-initdb.d/10-init.sh
+
 VOLUME ["/data"]
 
 ENTRYPOINT ["/usr/bin/entrypoint"]
